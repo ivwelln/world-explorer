@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %></title>
+  <style>
+    body {
+      background: #fff;
+      color: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* Таймер ниже, центрирован */
+    #timer {
+      margin-top: 1rem;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #0a47a1;
+      user-select: none;
+      background: #e6f0ff;
+      padding: 6px 12px;
+      border-radius: 12px;
+      box-shadow: 0 0 6px rgba(10, 71, 161, 0.3);
+      align-self: center;
+    }
+
+    h1 {
+      color: #0a47a1;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    #question-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    #question-text {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      white-space: pre-wrap;
+    }
+
+    #options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .option-button {
+      background-color: #0a47a1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .option-button:hover:not(:disabled) {
+      background-color: #073877;
+    }
+
+    .option-button.correct {
+      background-color: #33a833 !important;
+      cursor: default;
+    }
+
+    .option-button.incorrect {
+      background-color: #a83333 !important;
+      cursor: default;
+    }
+
+    .option-button:disabled {
+      cursor: default;
+      opacity: 0.8;
+    }
+
+    #next-btn {
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+      align-self: center;
+      background-color: #0a47a1;
+    }
+
+    #next-btn:hover:not(:disabled) {
+      background-color: #073877;
+    }
+
+    #next-btn:disabled {
+      background-color: #6193e8;
+      cursor: not-allowed;
+    }
+
+    /* Завершить — зеленая кнопка */
+    #next-btn.finish {
+      background-color: #2e8b57;
+    }
+
+    #next-btn.finish:hover:not(:disabled) {
+      background-color: #246b45;
+    }
+
+    /* Модальное окно результата */
+    #result-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    #result-modal.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #result-content {
+      background: white;
+      border-radius: 14px;
+      padding: 2rem 3rem;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(10, 71, 161, 0.3);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    #result-content h2 {
+      color: #0a47a1;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+
+    #result-content p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      user-select: none;
+    }
+
+    #result-content button {
+      background-color: #0a47a1;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.8rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      user-select: none;
+      margin-top: 1rem;
+    }
+
+    #result-content button:hover {
+      background-color: #073877;
+    }
+
+    /* Список вопросов с ответами */
+    #answers-list {
+      text-align: left;
+      margin-top: 1rem;
+      max-height: 50vh;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
+
+    .answer-item {
+      margin-bottom: 1rem;
+      line-height: 1.3;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    .answer-item .question-text {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .answer-item .user-answer {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .answer-item .correct-answer {
+      display: inline-block;
+      margin-left: 8px;
+      font-weight: 600;
+      color: #33a833;
+    }
+
+    .user-answer.correct {
+      background-color: #33a833;
+    }
+
+    .user-answer.incorrect {
+      background-color: #a83333;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= test.title %></h1>
+
+  <div id="timer">Время осталось: <span id="time-remaining"><%= test.timeLimitSeconds || 120 %></span> сек</div>
+
+  <div id="question-container" aria-live="polite">
+    <div id="question-text"></div>
+    <div id="options-grid"></div>
+    <button id="next-btn" disabled>Следующий</button>
+  </div>
+
+  <!-- Модальное окно результата -->
+  <div id="result-modal" aria-hidden="true">
+    <div id="result-content" role="dialog" aria-modal="true" aria-labelledby="result-title">
+      <h2 id="result-title">Результаты теста</h2>
+      <p id="score-text"></p>
+      <div id="answers-list"></div>
+      <button id="close-modal-btn">Вернуться к списку тестов</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = <%- JSON.stringify(questions) %>;
+    const testId = "<%= test._id %>";
+    const totalTime = <%= test.timeLimitSeconds > 0 ? test.timeLimitSeconds : 120 %>;
+
+    let currentIndex = 0;
+    let answers = new Array(questions.length).fill(null);
+    let timeLeft = totalTime;
+    let timerInterval = null;
+
+    const timerEl = document.getElementById('time-remaining');
+    const questionTextEl = document.getElementById('question-text');
+    const optionsGrid = document.getElementById('options-grid');
+    const nextBtn = document.getElementById('next-btn');
+
+    const modal = document.getElementById('result-modal');
+    const scoreText = document.getElementById('score-text');
+    const answersList = document.getElementById('answers-list');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    async function sendResults() {
+            let correctCount = 0;
+            questions.forEach((q, i) => {
+                if (answers[i] === q.correctAnswer) correctCount++;
+            });
+
+            // Формируем массив с вопросами и выбранными ответами
+            const answersPayload = questions.map((q, i) => ({
+                question: q.question,
+                selected: answers[i],
+                correct: q.correctAnswer,
+            }));
+
+            try {
+                const res = await fetch(`/tests/submit/${testId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        answers: answersPayload,
+                        score: correctCount
+                    })
+                });
+
+                if (res.ok) {
+                    console.log('Результаты успешно отправлены');
+                } else {
+                    console.error('Ошибка при отправке результатов');
+                }
+            } catch (e) {
+                console.error('Ошибка сети при отправке результатов', e);
+            }
+        }
+
+
+    function renderQuestion() {
+      const q = questions[currentIndex];
+      questionTextEl.textContent = q.question;
+
+      optionsGrid.innerHTML = '';
+
+      q.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-button');
+        btn.textContent = option;
+        btn.type = 'button';
+        btn.disabled = answers[currentIndex] !== null;
+
+        btn.onclick = () => {
+          if (answers[currentIndex] === null) {
+            answers[currentIndex] = option;
+            highlightAnswers();
+            nextBtn.disabled = false;
+            disableOptionButtons();
+          }
+        };
+
+        optionsGrid.appendChild(btn);
+      });
+
+      nextBtn.disabled = answers[currentIndex] === null;
+
+      // Меняем текст и цвет кнопки на последнем вопросе
+      if (currentIndex === questions.length - 1) {
+        nextBtn.textContent = 'Завершить';
+        nextBtn.classList.add('finish');
+      } else {
+        nextBtn.textContent = 'Следующий';
+        nextBtn.classList.remove('finish');
+      }
+    }
+
+    function disableOptionButtons() {
+      const buttons = optionsGrid.querySelectorAll('button.option-button');
+      buttons.forEach(btn => btn.disabled = true);
+    }
+
+    function highlightAnswers() {
+      const q = questions[currentIndex];
+      const buttons = optionsGrid.querySelectorAll('button.option-button');
+      buttons.forEach(btn => {
+        btn.classList.remove('correct', 'incorrect');
+        if (answers[currentIndex] === null) return;
+        if (btn.textContent === q.correctAnswer) {
+          btn.classList.add('correct');
+        }
+        if (btn.textContent === answers[currentIndex] && answers[currentIndex] !== q.correctAnswer) {
+          btn.classList.add('incorrect');
+        }
+      });
+    }
+
+    function goToNextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        finishTest();
+      }
+    }
+
+    async function finishTest() {
+      clearInterval(timerInterval);
+
+      // Подсчёт правильных ответов
+      let correctCount = 0;
+      questions.forEach((q, i) => {
+        if (answers[i] === q.correctAnswer) correctCount++;
+      });
+
+      await sendResults();
+
+      // Показываем результаты
+      scoreText.textContent = `Вы ответили правильно на ${correctCount} из ${questions.length} вопросов.`;
+
+      // Список вопросов с ответами
+      answersList.innerHTML = '';
+      questions.forEach((q, i) => {
+        const item = document.createElement('div');
+        item.classList.add('answer-item');
+
+        const questionDiv = document.createElement('div');
+        questionDiv.classList.add('question-text');
+        questionDiv.textContent = `${i + 1}. ${q.question}`;
+        item.appendChild(questionDiv);
+
+        const userAnswerSpan = document.createElement('span');
+        userAnswerSpan.classList.add('user-answer');
+
+        if (answers[i] === q.correctAnswer) {
+          userAnswerSpan.classList.add('correct');
+          userAnswerSpan.textContent = answers[i];
+          item.appendChild(userAnswerSpan);
+        } else {
+          userAnswerSpan.classList.add('incorrect');
+          userAnswerSpan.textContent = answers[i] || '(Нет ответа)';
+          item.appendChild(userAnswerSpan);
+
+          const correctAnswerSpan = document.createElement('span');
+          correctAnswerSpan.classList.add('correct-answer');
+          correctAnswerSpan.textContent = `Правильный ответ: ${q.correctAnswer}`;
+          item.appendChild(correctAnswerSpan);
+        }
+
+        answersList.appendChild(item);
+      });
+
+      modal.classList.add('visible');
+      modal.setAttribute('aria-hidden', 'false');
+
+      // Скрываем вопрос и кнопку
+      document.getElementById('question-container').style.display = 'none';
+      timerEl.style.display = 'none';
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Время осталось: ${timeLeft} сек`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          finishTest();
+        }
+      }, 1000);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      goToNextQuestion();
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      window.location.href = '/tests'; // Возврат к списку тестов (измени путь при необходимости)
+    });
+
+    // Инициализация
+    renderQuestion();
+    startTimer();
+  </script>
+</body>
+</html>

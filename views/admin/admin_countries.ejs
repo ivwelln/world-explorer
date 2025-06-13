@@ -1,0 +1,103 @@
+<%- include('partials/header', { user: user }) %>
+
+    <style>
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0a47a1;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-blue {
+            background-color: #0a47a1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-blue:hover {
+            background-color: #063a7a;
+        }
+
+        .btn-add {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 6px rgba(10, 71, 161, 0.15);
+        }
+
+        thead {
+            background-color: #0a47a1;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        tbody tr:hover {
+            background-color: #f0f5ff;
+        }
+
+        .action-btn {
+            margin-right: 0.5rem;
+        }
+    </style>
+
+    <main>
+        <h1>Управление странами</h1>
+        <a href="/admin/countries/new" class="btn-blue btn-add">Добавить новую страну</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Столица</th>
+                    <th>Континент</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% countries.forEach(country=> { %>
+                    <tr>
+                        <td>
+                            <%= country.name %>
+                        </td>
+                        <td>
+                            <%= country.capital %>
+                        </td>
+                        <td>
+                            <%= country.continent %>
+                        </td>
+                        <td>
+                            <a href="/admin/countries/<%= country._id %>/edit" class="btn-blue action-btn"
+                                style="padding:0.3rem 0.7rem; font-size:0.9rem;">Редактировать</a>
+                            <form action="/admin/countries/<%= country._id %>?_method=DELETE" method="POST"
+                                style="display:inline;">
+                                <button type="submit" class="btn-blue"
+                                    style="background-color:#d9534f; border:none; padding:0.3rem 0.7rem; font-size:0.9rem;">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </main>
+
+    <%- include('partials/footer') %>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Панель администратора</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7faff;
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .admin-panel {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: #e6f0ff;
+      padding: 1.2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #444;
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-top: 0.3rem;
+      color: #0055cc;
+    }
+
+    .admin-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .admin-links a {
+      background-color: #0055cc;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 0.8rem;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: background 0.2s ease;
+    }
+
+    .admin-links a:hover {
+      background-color: #003f99;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-panel">
+    <h1>Панель администратора</h1>
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <p>Пользователей</p>
+        <span><%= stats.users %></span>
+      </div>
+      <div class="stat-card">
+        <p>Тестов</p>
+        <span><%= stats.tests %></span>
+      </div>
+      <div class="stat-card">
+        <p>Стран</p>
+        <span><%= stats.countries %></span>
+      </div>
+      <div class="stat-card">
+        <p>Пройденных тестов</p>
+        <span><%= stats.completedTests %></span>
+      </div>
+    </div>
+
+    <div class="admin-links">
+      <a href="/admin/countries/create">Управление странами</a>
+      <a href="/admin/tests/new">Управление тестами</a>
+      <a href="/admin/users">Пользователи</a>
+    </div>
+  </div>
+</body>
+</html>

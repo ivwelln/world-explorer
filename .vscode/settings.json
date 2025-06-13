@@ -1,0 +1,9 @@
+{
+    "[ejs]": {
+      "editor.formatOnSave": false
+    },
+    "files.associations": {
+      "*.ejs": "html"
+    }
+  }
+  

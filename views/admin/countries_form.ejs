@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2em;
+      background: #f4f7fa;
+      color: #333;
+    }
+    form {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 0.7em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 0.3em;
+      font-size: 1em;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 1.2em;
+      display: block;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .section {
+      border: 1px solid #d0d0d0;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-top: 2em;
+      background: #fafafa;
+    }
+    .row {
+      display: flex;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    .half {
+      flex: 1;
+    }
+    img {
+      margin: 0.5em;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
+    .thumbnail {
+      width: 150px;
+      height: 100px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 1em;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .file-label {
+      margin-top: 1em;
+      background: #e0e7ff;
+      border: 1px dashed #6b7cff;
+      color: #444;
+      text-align: center;
+      padding: 1em;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    .file-label:hover {
+      background: #d0d9ff;
+    }
+    canvas {
+      max-width: 100%;
+      margin-top: 1em;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 0.5em;
+    }
+    #imagePreviewContainer img {
+  width: 200px;
+  height: 130px;
+  position: relative;
+}
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 0.5em;
+}
+
+.image-wrapper img {
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  width: 200px;
+  height: 130px;
+}
+
+.image-wrapper .delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: rgba(255, 0, 0, 0.75);
+  color: white;
+  padding: 0.2em 0.5em;
+  font-size: 0.8em;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+}
+
+.image-wrapper:hover .delete-btn {
+  display: block;
+}
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 0.5em 0;
+}
+
+.image-wrapper img.thumbnail {
+  width: 150px;
+  height: 100px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.image-wrapper .delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: rgba(255, 0, 0, 0.75);
+  color: white;
+  padding: 0.2em 0.5em;
+  font-size: 0.8em;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+  user-select: none;
+}
+
+.image-wrapper:hover .delete-btn {
+  display: block;
+}
+  </style>
+</head>
+<body>
+  <form method="POST" action="<%= country ? '/admin/countries/' + country._id + '/edit' : '/admin/countries/create' %>" enctype="multipart/form-data" onsubmit="prepareData()">
+    <h1><%= title %></h1>
+
+    <label>Название</label>
+    <input type="text" name="name" value="<%= country?.name || '' %>" required>
+
+    <label>Столица</label>
+    <input type="text" name="capital" value="<%= country?.capital || '' %>">
+
+    <!-- Загрузка флага -->
+    <label class="file-label" onclick="document.getElementById('flagInput').click()">
+  Флаг (PNG, JPG)
+  <input type="file" name="flag" id="flagInput" accept="image/*" style="display:none" onchange="handleFlagSelect(event)">
+</label>
+
+<div id="flagPreviewContainer">
+  <% if (country?.flagPath) { %>
+    <div class="image-wrapper" id="flagWrapper">
+      <img src="<%= country.flagPath %>" alt="Флаг" class="thumbnail" id="flagPreview">
+      <span class="delete-btn" onclick="removeFlag()">удалить</span>
+    </div>
+    <input type="hidden" name="oldFlagPath" value="<%= country.flagPath %>">
+  <% } %>
+</div>
+
+    <label class="file-label">Фотографии страны (можно несколько)
+  <input type="file" name="images" id="imageInput" multiple accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+</label>
+<div id="imagePreviewContainer" class="row" style="flex-wrap: wrap;"></div>
+<input type="hidden" name="deletedImages" id="deletedImages">
+    <% if (country?.imagePaths?.length) { %>
+      <% country.imagePaths.forEach(path => { %>
+        <img src="<%= path %>" alt="Фото" class="thumbnail">
+      <% }) %>
+      <input type="hidden" name="oldImagePaths" value='<%= JSON.stringify(country.imagePaths) %>'>
+    <% } %>
+
+    <label>Координаты (широта и долгота)</label>
+    <div class="row">
+      <input class="half" type="number" name="latitude" step="any" placeholder="Широта" value="<%= country?.geography?.latitude || '' %>">
+      <input class="half" type="number" name="longitude" step="any" placeholder="Долгота" value="<%= country?.geography?.longitude || '' %>">
+    </div>
+
+    <div class="section">
+      <h3>География</h3>
+      <label>Континент</label>
+      <input type="text" name="continent" value="<%= country?.geography?.continent || '' %>">
+      <label>Количество морей/океанов</label>
+      <input type="number" name="seasOceansCount" value="<%= country?.geography?.seasOceansCount || '' %>">
+      <label>Количество рек</label>
+      <input type="number" name="riversCount" value="<%= country?.geography?.riversCount || '' %>">
+      <label>Количество озёр</label>
+      <input type="number" name="lakesCount" value="<%= country?.geography?.lakesCount || '' %>">
+      <label>Площадь (в км²)</label>
+      <input type="number" name="area" step="any" value="<%= country?.geography?.area || '' %>">
+    </div>
+
+    <div class="section">
+      <h3>Экономика</h3>
+      <label>ВВП</label>
+      <input type="number" name="gdp" step="any" value="<%= country?.economy?.gdp || '' %>">
+      <label>ВВП на душу населения</label>
+      <input type="number" name="gdpPerCapita" step="any" value="<%= country?.economy?.gdpPerCapita || '' %>">
+      <label>Инфляция (%)</label>
+      <input type="number" name="inflation" step="any" value="<%= country?.economy?.inflation || '' %>">
+      <label>Уровень безработицы (%)</label>
+      <input type="number" name="unemployment" step="any" value="<%= country?.economy?.unemployment || '' %>">
+      <label>Средняя зарплата</label>
+      <input type="number" name="avgSalary" step="any" value="<%= country?.economy?.avgSalary || '' %>">
+      <label>История ВВП <span class="note">(JSON: [{ "year": 2000, "value": 3000 }])</span></label>
+      <textarea name="gdpHistory" oninput="updateChart('gdp')"><%= JSON.stringify(country?.economy?.gdpHistory || []) %></textarea>
+      <canvas id="gdpChart" height="200"></canvas>
+    </div>
+
+    <div class="section">
+      <h3>Демография</h3>
+      <label>Население</label>
+      <input type="number" name="population" value="<%= country?.demographics?.population || '' %>">
+      <label>Плотность населения</label>
+      <input type="number" name="populationDensity" step="any" value="<%= country?.demographics?.populationDensity || '' %>">
+      <label>Ожидаемая продолжительность жизни</label>
+      <input type="number" name="lifeExpectancy" step="any" value="<%= country?.demographics?.lifeExpectancy || '' %>">
+      <label>История численности населения <span class="note">(JSON: [{ "year": 2000, "value": 50000000 }])</span></label>
+      <textarea name="populationHistory" oninput="updateChart('population')"><%= JSON.stringify(country?.demographics?.populationHistory || []) %></textarea>
+      <canvas id="populationChart" height="200"></canvas>
+    </div>
+
+    <div class="section">
+      <h3>Разделы</h3>
+      <div id="sections-container">
+        <% if (country?.sections?.length) {
+          country.sections.forEach(section => { %>
+            <div class="section">
+              <input type="text" name="sectionTitles" placeholder="Заголовок" value="<%= section.title %>">
+              <textarea name="sectionContents" placeholder="Содержимое"><%= section.content %></textarea>
+            </div>
+        <% }) } else { %>
+          <div class="section">
+            <input type="text" name="sectionTitles" placeholder="Заголовок">
+            <textarea name="sectionContents" placeholder="Содержимое"></textarea>
+          </div>
+        <% } %>
+      </div>
+      <button type="button" onclick="addSection()">Добавить раздел</button>
+    </div>
+
+    <div class="section">
+      <h3>Дополнительные поля</h3>
+      <div id="custom-fields">
+        <% if (country?.customFields) {
+          Object.entries(country.customFields).forEach(([key, value]) => { %>
+            <div class="row">
+              <input class="half" type="text" name="customFieldKeys" value="<%= key %>" placeholder="Название поля">
+              <input class="half" type="text" name="customFieldValues" value="<%= value %>" placeholder="Значение">
+            </div>
+        <% }) } %>
+      </div>
+      <button type="button" onclick="addCustomField()">Добавить поле</button>
+    </div>
+
+    <input type="hidden" name="sections" id="sections-json">
+    <input type="hidden" name="customFields" id="customFields-json">
+    <button type="submit">Сохранить</button>
+  </form>
+
+  <script>
+    function addSection() {
+      const container = document.getElementById('sections-container');
+      const div = document.createElement('div');
+      div.classList.add('section');
+      div.innerHTML = `
+        <input type="text" name="sectionTitles" placeholder="Заголовок">
+        <textarea name="sectionContents" placeholder="Содержимое"></textarea>
+      `;
+      container.appendChild(div);
+    }
+
+    function addCustomField() {
+      const container = document.getElementById('custom-fields');
+      const div = document.createElement('div');
+      div.classList.add('row');
+      div.innerHTML = `
+        <input class="half" type="text" name="customFieldKeys" placeholder="Название поля">
+        <input class="half" type="text" name="customFieldValues" placeholder="Значение">
+      `;
+      container.appendChild(div);
+    }
+
+    function prepareData() {
+      const titles = document.getElementsByName('sectionTitles');
+      const contents = document.getElementsByName('sectionContents');
+      const sections = [];
+      for(let i=0; i<titles.length; i++) {
+        const title = titles[i].value.trim();
+        const content = contents[i].value.trim();
+        if(title || content) sections.push({title, content});
+      }
+      document.getElementById('sections-json').value = JSON.stringify(sections);
+
+      const keys = document.getElementsByName('customFieldKeys');
+      const values = document.getElementsByName('customFieldValues');
+      const customFields = {};
+      for(let i=0; i<keys.length; i++) {
+        const key = keys[i].value.trim();
+        const value = values[i].value.trim();
+        if(key) customFields[key] = value;
+      }
+      document.getElementById('customFields-json').value = JSON.stringify(customFields);
+    }
+
+    let gdpChart = null;
+    let populationChart = null;
+
+    function updateChart(type) {
+      const jsonStr = document.querySelector(`[name="${type}History"]`).value;
+      try {
+        const data = JSON.parse(jsonStr);
+        const ctx = document.getElementById(`${type}Chart`).getContext('2d');
+        const labels = data.map(d => d.year);
+        const values = data.map(d => d.value);
+
+        const config = {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: type === 'gdp' ? 'ВВП' : 'Население',
+              data: values,
+              fill: false,
+              borderColor: type === 'gdp' ? '#007bff' : '#28a745',
+              tension: 0.3
+            }]
+          }
+        };
+
+        if (type === 'gdp') {
+          if (gdpChart) gdpChart.destroy();
+          gdpChart = new Chart(ctx, config);
+        } else {
+          if (populationChart) populationChart.destroy();
+          populationChart = new Chart(ctx, config);
+        }
+      } catch (err) {
+        console.warn(`Невалидный JSON в поле ${type}History`);
+      }
+    }
+
+    // Автозагрузка графиков при открытии страницы
+    window.onload = () => {
+      updateChart('gdp');
+      updateChart('population');
+    }
+  </script>
+  <script>
+  const imageInput = document.getElementById('imageInput');
+  const previewContainer = document.getElementById('imagePreviewContainer');
+  const deletedImagesInput = document.getElementById('deletedImages');
+  let selectedFiles = [];
+  let existingImages = <%- JSON.stringify(existingImages || []) %>;
+  let deletedImages = [];
+
+  function renderAllImages() {
+    previewContainer.innerHTML = '';
+
+    // 1. Сначала отобразим уже загруженные изображения
+    existingImages.forEach((url, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('image-wrapper');
+      wrapper.innerHTML = `
+        <img src="${url}" alt="Существующее изображение">
+        <div class="delete-btn" onclick="removeExistingImage(${index})">удалить</div>
+      `;
+      previewContainer.appendChild(wrapper);
+    });
+
+    // 2. Затем новые изображения (selectedFiles)
+    selectedFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('image-wrapper');
+        wrapper.innerHTML = `
+          <img src="${e.target.result}" alt="Новое изображение">
+          <div class="delete-btn" onclick="removeNewImage(${index})">удалить</div>
+        `;
+        previewContainer.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function handleImageSelect(event) {
+    const files = Array.from(event.target.files);
+    selectedFiles = files;
+    renderAllImages();
+  }
+
+  function removeNewImage(index) {
+    selectedFiles.splice(index, 1);
+
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    imageInput.files = dataTransfer.files;
+
+    renderAllImages();
+  }
+
+  function removeExistingImage(index) {
+    const removed = existingImages.splice(index, 1)[0];
+    deletedImages.push(removed);
+    deletedImagesInput.value = JSON.stringify(deletedImages);
+    renderAllImages();
+  }
+
+  // Отрисуем при загрузке
+  window.addEventListener('DOMContentLoaded', () => {
+    renderAllImages();
+  });
+</script>
+<script>
+    // Управление превью изображений
+    const imagesPreviewContainer = document.getElementById('imagesPreviewContainer');
+
+    function handleImagesSelect(event) {
+      const files = event.target.files;
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const div = document.createElement('div');
+          div.classList.add('image-wrapper');
+          div.dataset.isNew = 'true';
+
+          div.innerHTML = `
+            <img src="${e.target.result}" class="thumbnail" alt="Изображение">
+            <span class="delete-btn" onclick="removeImage(this)">удалить</span>
+          `;
+          imagesPreviewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(elem) {
+      const wrapper = elem.closest('.image-wrapper');
+      // Если это старое изображение, добавляем в список удалённых
+      if (!wrapper.dataset.isNew) {
+        const path = wrapper.dataset.path;
+        let deleted = JSON.parse(deletedImagesInput.value);
+        if (!deleted.includes(path)) {
+          deleted.push(path);
+          deletedImagesInput.value = JSON.stringify(deleted);
+        }
+      }
+      wrapper.remove();
+    }
+
+    // Перед отправкой формы можно подготовить дополнительные данные
+    function prepareData() {
+      // Если нужно - сериализовать дополнительные поля, например, динамические секции
+      // Здесь можно добавить логику сохранения данных из UI в hidden поля
+
+      // Например, обновить oldImagePaths, чтобы не потерять новые изменения
+      const existingImgs = [];
+      document.querySelectorAll('#imagesPreviewContainer .image-wrapper').forEach(div => {
+        if (!div.dataset.isNew) {
+          existingImgs.push(div.dataset.path);
+        }
+      });
+      document.getElementById('oldImagePathsInput')?.setAttribute('value', JSON.stringify(existingImgs));
+    }
+  </script>
+  <script>
+function handleFlagSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Если уже есть превью — просто заменяем src
+    let previewImg = document.getElementById('flagPreview');
+    if (!previewImg) {
+      // Если превью нет, создаем контейнер с изображением и кнопкой удаления
+      const container = document.getElementById('flagPreviewContainer');
+      container.innerHTML = `
+        <div class="image-wrapper" id="flagWrapper">
+          <img src="${e.target.result}" alt="Флаг" class="thumbnail" id="flagPreview">
+          <span class="delete-btn" onclick="removeFlag()">удалить</span>
+        </div>
+      `;
+    } else {
+      previewImg.src = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFlag() {
+  // Удаляем превью и очищаем input
+  const container = document.getElementById('flagPreviewContainer');
+  container.innerHTML = '';
+  
+  const input = document.getElementById('flagInput');
+  input.value = ''; // сброс выбранного файла
+
+  // Если есть скрытое поле с oldFlagPath, удаляем или очищаем его, чтобы при отправке старый флаг не учитывался
+  const oldFlagInput = document.querySelector('input[name="oldFlagPath"]');
+  if (oldFlagInput) oldFlagInput.remove();
+}
+</script>
+</body>
+</html>

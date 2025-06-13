@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= country.name %></title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #003366;
+      color: white;
+      padding: 1em;
+      text-align: center;
+    }
+    .collage {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 1em;
+      background: #ddd;
+    }
+    .collage img {
+      height: 200px;
+      border-radius: 10px;
+    }
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 2em;
+      gap: 2em;
+    }
+    .left-section {
+      flex: 2;
+    }
+    .right-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1em;
+    }
+    .flag {
+      max-width: 150px;
+      border: 1px solid #ccc;
+      background: white;
+      padding: 0.5em;
+    }
+    .info-box {
+      background: white;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+    .section {
+      margin: 2em;
+      border-radius: 10px;
+      padding: 1em;
+      color: #333;
+    }
+    .section.orange { background: #ffe5cc; }
+    .section.yellow { background: #fff9cc; }
+    .section.green  { background: #e6ffcc; }
+    .section h2 { margin-top: 0; }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2em;
+      justify-content: space-between;
+      padding: 0 2em;
+    }
+
+    .chart-box {
+      flex: 1;
+      min-width: 300px;
+      background: white;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    .admin-section {
+      background: #ffffff;
+      margin: 2em;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+  </style>
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+  <header style="border-radius: 10px;">
+    <h1 style="color: #ffffff;"><%= country.name %></h1>
+  </header>
+
+  <div class="collage">
+    <% (country.imagePaths || []).forEach(path => { %>
+      <img src="<%= path %>" alt="Фото страны">
+    <% }) %>
+  </div>
+
+  <div class="main-container">
+    <div class="left-section">
+      <div class="section orange">
+        <h2>География</h2>
+        <p><strong>Континент:</strong> <%= country.geography?.continent %></p>
+        <p><strong>Моря/океаны:</strong> <%= country.geography?.seasOceansCount %></p>
+        <p><strong>Реки:</strong> <%= country.geography?.riversCount %></p>
+        <p><strong>Озёра:</strong> <%= country.geography?.lakesCount %></p>
+        <p><strong>Площадь:</strong> <%= country.geography?.area %> км²</p>
+      </div>
+
+      <div class="section yellow">
+        <h2>Экономика</h2>
+        <p><strong>ВВП:</strong> <%= country.economy?.gdp %></p>
+        <p><strong>ВВП на душу:</strong> <%= country.economy?.gdpPerCapita %></p>
+        <p><strong>Инфляция:</strong> <%= country.economy?.inflation %>%</p>
+        <p><strong>Безработица:</strong> <%= country.economy?.unemployment %>%</p>
+        <p><strong>Средняя зарплата:</strong> <%= country.economy?.avgSalary %></p>
+      </div>
+    </div>
+
+    <div class="right-section">
+      
+      <div class="info-box">
+  <img src="<%= country.flagPath %>" alt="Флаг" style="width: 100%; max-width: 200px; border: 1px solid #ccc; background: white; padding: 0.5em; border-radius: 6px; margin-bottom: 1em;">
+  <p><strong>Столица:</strong> <%= country.capital %></p>
+  <p><strong>Координаты:</strong> <%= country.geography?.latitude %>, <%= country.geography?.longitude %></p>
+  <p><strong>Население:</strong> <%= country.demographics?.population %></p>
+  <p><strong>Плотность:</strong> <%= country.demographics?.populationDensity %></p>
+  <p><strong>Продолжительность жизни:</strong> <%= country.demographics?.lifeExpectancy %> лет</p>
+</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="chart-box">
+      <h3>История ВВП</h3>
+      <div id="gdpChart"></div>
+    </div>
+    <div class="chart-box">
+      <h3>История населения</h3>
+      <div id="populationChart"></div>
+    </div>
+  </div>
+
+  <div id="map" style="width: 100%; height: 400px; margin-top: 20px; border-radius: 12px; overflow: hidden;"></div>
+
+  <% if (country.sections?.length) { %>
+    <% country.sections.forEach(section => { %>
+      <div class="admin-section">
+        <h2><%= section.title %></h2>
+        <p><%= section.content %></p>
+      </div>
+    <% }) %>
+  <% } %>
+
+  <div id="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); align-items: center; justify-content: center;">
+  <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 10px rgb(0, 0, 0);">
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const gdpHistory = <%- JSON.stringify(country.economy?.gdpHistory || []) %>;
+    const populationHistory = <%- JSON.stringify(country.demographics?.populationHistory || []) %>;
+
+    const gdpCtx = document.getElementById('gdpChart');
+    const populationCtx = document.getElementById('populationChart');
+
+    if (gdpHistory.length) {
+      new Chart(gdpCtx, {
+        type: 'line',
+        data: {
+          labels: gdpHistory.map(e => e.year),
+          datasets: [{
+            label: 'ВВП',
+            data: gdpHistory.map(e => e.value),
+            borderColor: '#ff9900',
+            fill: false
+          }]
+        }
+      });
+    }
+
+    if (populationHistory.length) {
+      new Chart(populationCtx, {
+        type: 'line',
+        data: {
+          labels: populationHistory.map(e => e.year),
+          datasets: [{
+            label: 'Население',
+            data: populationHistory.map(e => e.value),
+            borderColor: '#3399ff',
+            fill: false
+          }]
+        }
+      });
+    }
+  </script>
+  <script>
+  ymaps.ready(init);
+
+  function init() {
+    const latitude = <%= country.geography.latitude || 0 %>;
+    const longitude = <%= country.geography.longitude || 0 %>;
+
+    const map = new ymaps.Map("map", {
+      center: [latitude, longitude],
+      zoom: 4
+    });
+
+    const placemark = new ymaps.Placemark([latitude, longitude], {
+      balloonContent: '<strong><%= country.name %></strong><br><%= country.capital %>'
+    }, {
+      preset: 'islands#redDotIcon'
+    });
+
+    map.geoObjects.add(placemark);
+  }
+</script>
+<script>
+  const modal = document.getElementById('modal');
+  const modalImage = document.getElementById('modalImage');
+
+  document.querySelectorAll('.collage img').forEach(img => {
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', () => {
+      modalImage.src = img.src;
+      modal.style.display = 'flex';
+    });
+  });
+
+  modal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    modalImage.src = '';
+  });
+</script>
+</body>
+</html>

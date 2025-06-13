@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+
+    <div class="container mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Управление тестами</h1>
+            <a href="/admin/tests/new" class="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition">
+                + Добавить тест
+            </a>
+        </div>
+
+        <% if (tests.length===0) { %>
+            <p class="text-gray-600">Пока что нет тестов.</p>
+            <% } else { %>
+                <div class="grid gap-4">
+                    <% tests.forEach(test=> { %>
+                        <div class="bg-white p-4 shadow rounded-xl flex justify-between items-center">
+                            <div>
+                                <h2 class="text-xl font-semibold">
+                                    <%= test.title %>
+                                </h2>
+                                <p class="text-gray-600">Вопросов: <%= test.questions.length %>
+                                </p>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="/admin/tests/<%= test._id %>/edit"
+                                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Редактировать</a>
+                                <form action="/admin/tests/<%= test._id %>?_method=DELETE" method="POST">
+                                    <button type="submit"
+                                        class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+                <% } %>
+    </div>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">Личный кабинет</h1>
+
+        <div class="bg-white shadow rounded-xl p-6 space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">Информация о пользователе</h2>
+                    <p><strong>Имя:</strong>
+                        <%= user.name %>
+                    </p>
+                    <p><strong>Почта:</strong>
+                        <%= user.email %>
+                    </p>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">Статистика</h2>
+                    <p><strong>Пройдено тестов:</strong>
+                        <%= stats.testsTaken %>
+                    </p>
+                    <p><strong>Правильных ответов:</strong>
+                        <%= stats.correctPercentage %> %
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Последние посещённые страны</h2>
+                <% if (recentCountries.length===0) { %>
+                    <p class="text-gray-600">Вы ещё не просматривали страницы стран.</p>
+                    <% } else { %>
+                        <ul class="list-disc list-inside space-y-2">
+                            <% recentCountries.forEach(country=> { %>
+                                <li>
+                                    <a href="/countries/<%= country._id %>" class="text-blue-600 hover:underline">
+                                        <%= country.name %>
+                                    </a>
+                                </li>
+                                <% }) %>
+                        </ul>
+                        <% } %>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <form action="/logout" method="POST">
+                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600">
+                        Выйти из аккаунта
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

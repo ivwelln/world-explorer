@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %> | Изучение стран</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+      background-color: #ffffff !important;
+      color: #003366 !important;
+    }
+
+    .layout-header {
+      background-color: #4d7eaf;
+      border-bottom: 2px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 0.5rem;
+      margin: 0.5rem 2rem 2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .layout-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .layout-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffffff;
+      text-decoration: none;
+      padding-left: 10px;
+    }
+
+    .layout-nav {
+      display: flex;
+      justify-content: center;
+      flex-grow: 1;
+      gap: 1.5rem;
+    }
+
+    .layout-nav a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .layout-nav a:hover {
+      background-color: #e6f0ff;
+      color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    .layout-nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .layout-nav-right a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .layout-nav-right a:hover {
+      background-color: #e6f0ff;
+      color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    .layout-main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .layout-footer {
+      background-color: #f2f8ff;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 3rem;
+      border-top: 1px solid #d0e0f0;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="layout-header">
+    <div class="layout-nav-left">
+      <a href="/" class="layout-logo">Страны мира</a>
+    </div>
+
+    <nav class="layout-nav">
+      <a href="/">Главная</a>
+      <a href="/countries">Словарь стран</a>
+      <a href="/tests">Тесты</a>
+    </nav>
+
+    <div class="layout-nav-right">
+      <% if (currentUser) { %>
+        <a href="/profile">Профиль (<%= currentUser.name %>)</a>
+        <% if (currentUser.role === 'admin') { %>
+          <a href="/admin">Админ</a>
+        <% } %>
+      <% } else { %>
+        <a href="/auth/login">Вход</a>
+        <a href="/auth/register">Регистрация</a>
+      <% } %>
+    </div>
+  </header>
+
+  <main class="layout-main">
+    <%- body %>
+  </main>
+
+  <footer class="layout-footer">
+    <p>© 2025 Изучение стран</p>
+  </footer>
+</body>
+</html>

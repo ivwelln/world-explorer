@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    /* --- Стили, сокращённо для читаемости --- */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      color: #003366;
+      margin-bottom: 1em;
+    }
+
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5em;
+    }
+
+    .country-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 1em;
+      display: flex;
+      gap: 1em;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .country-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0, 102, 204, 0.2);
+    }
+
+    .country-flag {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: white;
+    }
+
+    .country-info {
+      flex-grow: 1;
+    }
+
+    .country-info h2 {
+      margin: 0;
+      font-size: 1.2em;
+      color: #003366;
+    }
+
+    .country-info p {
+      margin: 0.3em 0 0;
+      color: #555;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4em;
+    }
+
+    .btn-edit,
+    .btn-delete {
+      font-size: 0.85em;
+      border: none;
+      padding: 0.4em 0.8em;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-edit {
+      background: #0074e8;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #005bb5;
+    }
+
+    .btn-delete {
+      background: #e63946;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #b32b35;
+    }
+
+    form.filters {
+      display: flex;
+      gap: 1em;
+      margin-bottom: 2em;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"],
+    select {
+      padding: 0.6em;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 2px solid #0066cc;
+    }
+
+    button[type="submit"] {
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6em 1.2em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Словарь стран</h1>
+
+  <form method="GET" class="filters">
+    <input type="text" name="search" placeholder="Поиск по стране или столице" value="<%= searchQuery || '' %>">
+    <select name="continent">
+      <option value="">Все континенты</option>
+      <% continents.forEach(cont => { %>
+        <option value="<%= cont %>" <%= selectedContinent === cont ? 'selected' : '' %>><%= cont %></option>
+      <% }) %>
+    </select>
+    <button type="submit">Поиск</button>
+  </form>
+
+  <% const renderCountryCard = (c) => { %>
+    <div class="country-card" onclick="location.href='/countries/<%= c._id %>'">
+      <img src="<%= c.flagUrl || c.flagPath %>" alt="Флаг <%= c.name %>" class="country-flag">
+      <div class="country-info">
+        <h2><%= c.name %></h2>
+        <p><%= c.capital %></p>
+      </div>
+      <% if (user && user.role === 'admin') { %>
+        <div class="actions" onclick="event.stopPropagation();">
+          <a href="/admin/countries/edit/<%= c._id %>" class="btn-edit">Редактировать</a>
+          <form action="/admin/countries/delete/<%= c._id %>" method="POST" onsubmit="event.stopPropagation(); return confirm('Удалить <%= c.name %>?');">
+            <button type="submit" class="btn-delete">Удалить</button>
+          </form>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+
+  <% if (searchQuery) { %>
+    <h2>Результаты поиска</h2>
+    <div class="country-grid">
+      <% flatCountries.forEach(c => { %>
+        <%- renderCountryCard(c) %>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <% for (const continent of Object.keys(groupedCountries)) { %>
+      <h2><%= continent %></h2>
+      <div class="country-grid">
+        <% groupedCountries[continent].forEach(c => { %>
+          <%- renderCountryCard(c) %>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+</body>
+</html>

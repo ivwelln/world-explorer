@@ -1,0 +1,95 @@
+<style>
+  h1, h2 {
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #003366;
+  }
+  section {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px 20px;
+    background: #f0f8ff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+    font-family: Arial, sans-serif;
+  }
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  ul li {
+    margin: 8px 0;
+    font-size: 1.1em;
+  }
+  a {
+    color: #00509e;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .stat {
+    font-size: 1.2em;
+    margin: 10px 0;
+  }
+  .results-list li {
+    background: #e6f0ff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .result-title {
+    font-weight: 700;
+    color: #004080;
+  }
+  .result-detail {
+    margin-left: 10px;
+    color: #333;
+  }
+</style>
+
+<h1>Профиль пользователя <%= user.name %></h1>
+
+<section>
+  <h2>Статистика</h2>
+  <p class="stat">Пройдено тестов: <strong><%= user.stats.testsPassed %></strong></p>
+  <p class="stat">Средний процент правильных ответов: <strong><%= user.stats.correctAnswersPercent %> %</strong></p>
+</section>
+
+<section>
+  <h2>Последние посещённые страны</h2>
+  <ul>
+    <% if (countries.length === 0) { %>
+      <li>Пока нет посещённых стран</li>
+    <% } else { %>
+      <% countries.forEach(c => { %>
+        <li><a href="/countries/<%= c._id %>"><%= c.name %></a></li>
+      <% }) %>
+    <% } %>
+  </ul>
+</section>
+
+<section>
+  <h2>История результатов тестов</h2>
+  <% if (results.length === 0) { %>
+    <p>Результатов пока нет</p>
+  <% } else { %>
+    <ul class="results-list">
+      <% results.forEach(r => { %>
+  <% if (r.test) { %>
+    <li>
+      <span class="result-title"><%= r.test.title %></span> — 
+      <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
+      <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
+    </li>
+  <% } else { %>
+    <li>
+      <span class="result-title text-muted">[удалённый тест]</span> — 
+      <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
+      <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
+    </li>
+  <% } %>
+<% }) %>
+    </ul>
+  <% } %>
+</section>

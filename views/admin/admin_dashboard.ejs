@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">Панель администратора</h1>
+
+        <!-- Статистика -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow p-4 text-center">
+                <h2 class="text-xl font-semibold">Пользователи</h2>
+                <p class="text-3xl font-bold mt-2">
+                    <%= stats.users %>
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4 text-center">
+                <h2 class="text-xl font-semibold">Страны</h2>
+                <p class="text-3xl font-bold mt-2">
+                    <%= stats.countries %>
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4 text-center">
+                <h2 class="text-xl font-semibold">Тесты</h2>
+                <p class="text-3xl font-bold mt-2">
+                    <%= stats.tests %>
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4 text-center">
+                <h2 class="text-xl font-semibold">Пройдено тестов</h2>
+                <p class="text-3xl font-bold mt-2">
+                    <%= stats.testsTaken %>
+                </p>
+            </div>
+        </div>
+
+        <!-- Навигация по админке -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <a href="/admin/countries/new"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-center px-6 py-4 rounded-xl shadow transition duration-300">
+                ➕ Добавить новую страну
+            </a>
+            <a href="/admin/tests/new"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-center px-6 py-4 rounded-xl shadow transition duration-300">
+                📝 Создать новый тест
+            </a>
+        </div>
+
+        <!-- Назначение администраторов -->
+        <div class="bg-white shadow rounded-xl p-6">
+            <h2 class="text-2xl font-semibold mb-4">Назначение администраторов</h2>
+
+            <form action="/admin/promote" method="POST" class="flex gap-4 items-center">
+                <input type="email" name="email" required placeholder="Введите email пользователя"
+                    class="border border-gray-300 rounded-xl px-4 py-2 w-full" />
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600">
+                    Назначить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

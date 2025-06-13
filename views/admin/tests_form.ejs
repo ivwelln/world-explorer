@@ -1,0 +1,232 @@
+<div class="container">
+    <h2 class="title"><%= title %></h2>
+
+    <form action="<%= formAction %>" method="POST" id="testForm" class="form">
+
+        <label for="title" class="label">Название теста</label>
+        <input type="text" id="title" name="title" class="input" placeholder="Введите название теста"
+            value="<%= test ? test.title : '' %>" required>
+
+        <label for="timeLimitSeconds" class="label">Время на тест (секунды)</label>
+        <input type="number" id="timeLimitSeconds" name="timeLimitSeconds" class="input" min="1"
+            placeholder="Например, 1800" value="<%= test ? test.timeLimitSeconds : '' %>" required>
+
+        <h3>Вопросы</h3>
+        <div id="questionsContainer"></div>
+
+        <button type="button" id="addQuestionBtn" class="btn btn-outline" style="margin-bottom:20px;">Добавить
+            вопрос</button>
+
+        <h3>Пул ответов (редактируемый)</h3>
+        <div id="answersPoolContainer"></div>
+        <div style="display:flex; margin-top:10px;">
+            <input type="text" id="newAnswerInput" class="input" placeholder="Новый ответ..."
+                style="flex-grow:1; margin-right:8px;">
+            <button type="button" id="addAnswerBtn" class="btn btn-primary">Добавить ответ в пул</button>
+        </div>
+
+        <!-- Скрытые поля для отправки JSON -->
+        <input type="hidden" name="questions" id="questionsInput">
+        <input type="hidden" name="answersPool" id="answersPoolInput">
+
+        <div class="buttons" style="margin-top:30px;">
+            <a href="/admin" class="btn btn-outline">Отмена</a>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .question-block {
+        background: #f0f4ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .question-block label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+    }
+
+    .question-block .input {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .answer-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .answer-item {
+        background: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .answer-item .delete-text {
+        color: #ff4d4d;
+        cursor: pointer;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    #title, #timeLimitSeconds {
+        font-size: 1.2rem;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    #answersPoolContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialTest = <%- JSON.stringify(test || { questions: [] }) %>;
+        const initialAnswersPool = <%- JSON.stringify(answersPool || []) %>;
+
+        let questions = initialTest.questions || [];
+        let answersPool = initialAnswersPool || [];
+
+        const questionsContainer = document.getElementById('questionsContainer');
+        const answersPoolContainer = document.getElementById('answersPoolContainer');
+        const questionsInput = document.getElementById('questionsInput');
+        const answersPoolInput = document.getElementById('answersPoolInput');
+
+        function escapeHTML(text) {
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, m => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[m]);
+        }
+
+        function renderQuestions() {
+            questionsContainer.innerHTML = '';
+
+            questions.forEach((q, i) => {
+                const div = document.createElement('div');
+                div.className = 'question-block';
+
+                div.innerHTML = `
+                    <label>Вопрос ${i + 1}</label>
+                    <input type="text" class="input question-text" placeholder="Текст вопроса" value="${escapeHTML(q.question || '')}">
+
+                    <label>Правильный ответ</label>
+                    <input type="text" class="input correct-answer" placeholder="Правильный ответ" value="${escapeHTML(q.correctAnswer || '')}">
+
+                    <label>Неправильные ответы (оставьте пустыми для использования пула)</label>
+                    <div class="answer-grid">
+                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 1" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[0]) || '')}">
+                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 2" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[1]) || '')}">
+                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 3" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[2]) || '')}">
+                    </div>
+
+                    <button type="button" class="btn btn-outline delete-question-btn" style="margin-top:8px;">Удалить вопрос</button>
+                `;
+
+                questionsContainer.appendChild(div);
+
+                div.querySelector('.delete-question-btn').addEventListener('click', () => {
+                    questions.splice(i, 1);
+                    renderQuestions();
+                });
+            });
+        }
+
+        function renderAnswersPool() {
+            answersPoolContainer.innerHTML = '';
+            answersPool.forEach((answer, idx) => {
+                const div = document.createElement('div');
+                div.className = 'answer-item';
+                div.innerHTML = `
+                    <span>${escapeHTML(answer)}</span>
+                    <span class="delete-text" data-index="${idx}">Удалить</span>
+                `;
+                answersPoolContainer.appendChild(div);
+
+                div.querySelector('.delete-text').addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    answersPool.splice(index, 1);
+                    renderAnswersPool();
+                });
+            });
+        }
+
+        function collectQuestionData() {
+            const questionBlocks = document.querySelectorAll('.question-block');
+            return Array.from(questionBlocks).map(div => {
+                const questionText = div.querySelector('.question-text').value.trim();
+                const correctAnswer = div.querySelector('.correct-answer').value.trim();
+                const wrongInputs = div.querySelectorAll('.wrong-answer');
+                const wrongAnswers = Array.from(wrongInputs).map(input => input.value.trim());
+
+                const allWrongEmpty = wrongAnswers.every(w => w === '');
+
+                let finalWrongAnswers = allWrongEmpty
+                    ? getRandomWrongAnswers(correctAnswer)
+                    : wrongAnswers;
+
+                return {
+                    question: questionText,
+                    correctAnswer,
+                    wrongAnswers: finalWrongAnswers
+                };
+            });
+        }
+
+        function getRandomWrongAnswers(correctAnswer) {
+            const filtered = answersPool.filter(ans => ans !== correctAnswer);
+            const shuffled = filtered.sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, 3);
+        }
+
+        document.getElementById('addQuestionBtn').addEventListener('click', () => {
+            questions = collectQuestionData();
+            questions.push({
+                question: '',
+                correctAnswer: '',
+                wrongAnswers: ['', '', '']
+            });
+            renderQuestions();
+        });
+
+        document.getElementById('addAnswerBtn').addEventListener('click', () => {
+            const newAnswerInput = document.getElementById('newAnswerInput');
+            const val = newAnswerInput.value.trim();
+            if (val && !answersPool.includes(val)) {
+                answersPool.push(val);
+                newAnswerInput.value = '';
+                renderAnswersPool();
+            }
+        });
+
+        document.getElementById('testForm').addEventListener('submit', () => {
+            questions = collectQuestionData();
+            questionsInput.value = JSON.stringify(questions);
+            answersPoolInput.value = JSON.stringify(answersPool);
+        });
+
+        renderQuestions();
+        renderAnswersPool();
+    });
+</script>
