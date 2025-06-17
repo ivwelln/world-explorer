@@ -132,7 +132,7 @@
   <form method="GET" class="filters">
     <input type="text" name="search" placeholder="Поиск по стране или столице" value="<%= searchQuery || '' %>">
     <select name="continent">
-      <option value="">Все континенты</option>
+      <option value="">Все Материки</option>
       <% continents.forEach(cont => { %>
         <option value="<%= cont %>" <%= selectedContinent === cont ? 'selected' : '' %>><%= cont %></option>
       <% }) %>

@@ -90,6 +90,60 @@
       border-radius: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.05);
     }
+    .collage {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 1em;
+  background: #ddd;
+  scroll-behavior: smooth; /* плавный скролл */
+  -webkit-overflow-scrolling: touch; /* плавный скролл на iOS */
+}
+
+.collage img {
+  height: 200px;
+  border-radius: 10px;
+  flex-shrink: 0; /* чтобы не сжимались */
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Стили для видимого скроллбара (в некоторых браузерах) */
+.collage::-webkit-scrollbar {
+  height: 8px;
+}
+
+.collage::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+/* Для Firefox */
+.collage {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+.collage::before,
+.collage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.collage::before {
+  left: 0;
+  background: linear-gradient(to right, #ddd, transparent);
+}
+
+.collage::after {
+  right: 0;
+  background: linear-gradient(to left, #ddd, transparent);
+}
   </style>
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 </head>
@@ -98,17 +152,19 @@
     <h1 style="color: #ffffff; font-size: 4rem; margin-top: 0.5rem; margin-bottom: 0.5rem;"><%= country.name %></h1>
   </header>
 
+  <div style="position: relative;">
   <div class="collage">
     <% (country.imagePaths || []).forEach(path => { %>
       <img src="<%= path %>" alt="Фото страны">
     <% }) %>
   </div>
+</div>
 
   <div class="main-container">
     <div class="left-section">
       <div class="section orange">
         <h2>География</h2>
-        <p><strong>Континент:</strong> <%= country.geography?.continent %></p>
+        <p><strong>Материк:</strong> <%= country.geography?.continent %></p>
         <p><strong>Моря:</strong> <%= country.geography?.seasOceansCount %></p>
         <p><strong>Реки:</strong> <%= country.geography?.riversCount %></p>
         <p><strong>Озёра:</strong> <%= country.geography?.lakesCount %></p>
@@ -239,6 +295,8 @@
     modal.style.display = 'none';
     modalImage.src = '';
   });
+
+
 </script>
 </body>
 </html>
