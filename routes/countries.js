@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Country = require('../models/Country');
+const User = require('../models/User');
 
 
 router.get('/', async (req, res) => {
@@ -55,11 +56,33 @@ router.get('/', async (req, res) => {
 
 // Страница одной страны
 router.get('/:id', async (req, res) => {
+  const user = req.session.user || null;
   try {
     const country = await Country.findById(req.params.id);
     if (!country) return res.status(404).send('Страна не найдена');
+
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      if (user) {
+        if (!user.stats) user.stats = {};
+        if (!user.stats.lastVisitedCountries) user.stats.lastVisitedCountries = [];
+
+        const countryIdStr = country._id.toString();
+
+        user.stats.lastVisitedCountries = user.stats.lastVisitedCountries.filter(
+          id => id.toString() !== countryIdStr
+        );
+
+        user.stats.lastVisitedCountries.unshift(country._id);
+        user.stats.lastVisitedCountries = user.stats.lastVisitedCountries.slice(0, 4);
+
+        await user.save();
+      }
+    }
+
     res.render('country', { title: country.name, country });
   } catch (e) {
+    console.error('Ошибка в маршруте /:id:', e);
     res.status(500).send('Ошибка сервера');
   }
 });

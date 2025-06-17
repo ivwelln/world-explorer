@@ -22,7 +22,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
     const user = await User.findById(req.user._id);
 
     // Получаем последние посещённые страны — предположим, у пользователя есть массив user.visitedCountries с id
-    const countries = await Country.find({ _id: { $in: user.visitedCountries || [] } }).limit(10);
+    const countries = await Country.find({ _id: { $in: user.stats.lastVisitedCountries || [] } }).limit(10);
 
     // Получаем результаты тестов с info по тесту
     const results = await TestResult.find({ user: user._id }).populate('test').sort({ date: -1 }).limit(10);

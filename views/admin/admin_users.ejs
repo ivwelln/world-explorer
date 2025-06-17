@@ -176,15 +176,15 @@
             <div class="actions">
               <% if (user.role !== 'admin') { %>
                 <form action="/admin/users/promote/<%= user._id %>" method="POST" onsubmit="return confirm('Назначить администратора?')">
-                  <button type="submit" class="btn-admin">Сделать админом</button>
+                  <button type="submit" class="btn-admin">Назначить администратора</button>
                 </form>
               <% } else { %>
                 <form action="/admin/users/demote/<%= user._id %>" method="POST" onsubmit="return confirm('Снять с админа?')">
-                  <button type="submit" class="btn-remove">Снять</button>
+                  <button type="submit" class="btn-remove">Снять администратора</button>
                 </form>
               <% } %>
               <form action="/admin/users/reset/<%= user._id %>" method="POST" onsubmit="return confirm('Сбросить статистику пользователя?')">
-                <button type="submit" class="btn-reset">Сбросить</button>
+                <button type="submit" class="btn-reset">Сбросить статистику</button>
               </form>
             </div>
           </td>

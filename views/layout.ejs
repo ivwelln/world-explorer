@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><%= title %> | Изучение стран</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
@@ -17,17 +18,18 @@
       background-color: #4d7eaf;
       border-bottom: 2px solid #e0e0e0;
       border-radius: 20px;
-      padding: 0.5rem;
-      margin: 0.5rem 2rem 2rem 2rem;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
     }
 
-    .layout-nav-left {
+    .layout-header-left {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 2rem;
     }
 
     .layout-logo {
@@ -35,47 +37,26 @@
       font-weight: bold;
       color: #ffffff;
       text-decoration: none;
-      padding-left: 10px;
     }
 
-    .layout-nav {
-      display: flex;
-      justify-content: center;
-      flex-grow: 1;
-      gap: 1.5rem;
-    }
-
-    .layout-nav a {
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 500;
-      padding: 0.4rem 0.6rem;
-      border-radius: 6px;
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-
-    .layout-nav a:hover {
-      background-color: #e6f0ff;
-      color: #0056b3;
-      transform: translateY(-2px);
-    }
-
+    .layout-nav,
     .layout-nav-right {
-      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 1rem;
     }
 
+    .layout-nav a,
     .layout-nav-right a {
       color: #ffffff;
       text-decoration: none;
       font-weight: 500;
-      padding: 0.4rem 0.6rem;
+      padding: 0.4rem 0.8rem;
       border-radius: 6px;
       transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
+    .layout-nav a:hover,
     .layout-nav-right a:hover {
       background-color: #e6f0ff;
       color: #0056b3;
@@ -97,21 +78,76 @@
       margin-top: 3rem;
       border-top: 1px solid #d0e0f0;
     }
+
+    /* Мобильное меню */
+    .menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  color: #fff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: auto; /* сдвиг вправо */
+}
+
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 0.5rem 0;
+      width: 100%;
+    }
+
+    .mobile-nav a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .layout-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .layout-nav,
+      .layout-nav-right {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: block;
+        align-self: flex-end;
+      }
+
+      .mobile-nav.active {
+        display: flex;
+      }
+
+      .layout-main {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 
 <body>
   <header class="layout-header">
-    <div class="layout-nav-left">
-      <a href="/" class="layout-logo">Страны мира</a>
-    </div>
-
+  <div class="layout-header-left">
+    <a href="/" class="layout-logo">Страны мира</a>
     <nav class="layout-nav">
       <a href="/">Главная</a>
       <a href="/countries">Словарь стран</a>
       <a href="/tests">Тесты</a>
     </nav>
+  </div>
 
+  <div class="layout-header-right">
+    <button class="menu-toggle" aria-label="Открыть меню" onclick="toggleMobileNav()">☰</button>
     <div class="layout-nav-right">
       <% if (currentUser) { %>
         <a href="/profile">Профиль (<%= currentUser.name %>)</a>
@@ -123,7 +159,23 @@
         <a href="/auth/register">Регистрация</a>
       <% } %>
     </div>
-  </header>
+  </div>
+
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/">Главная</a>
+    <a href="/countries">Словарь стран</a>
+    <a href="/tests">Тесты</a>
+    <% if (currentUser) { %>
+      <a href="/profile">Профиль (<%= currentUser.name %>)</a>
+      <% if (currentUser.role === 'admin') { %>
+        <a href="/admin">Панель администратора</a>
+      <% } %>
+    <% } else { %>
+      <a href="/auth/login">Вход</a>
+      <a href="/auth/register">Регистрация</a>
+    <% } %>
+  </nav>
+</header>
 
   <main class="layout-main">
     <%- body %>
@@ -132,5 +184,12 @@
   <footer class="layout-footer">
     <p>© 2025 Изучение стран</p>
   </footer>
+
+  <script>
+    function toggleMobileNav() {
+      const nav = document.getElementById('mobileNav');
+      nav.classList.toggle('active');
+    }
+  </script>
 </body>
 </html>

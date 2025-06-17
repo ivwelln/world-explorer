@@ -12,6 +12,7 @@
     color: #222;
     overflow-x: hidden;
   }
+
   .hero {
     position: relative;
     height: 60vh;
@@ -25,6 +26,8 @@
     text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
     user-select: none;
     animation: fadeIn 1.5s ease forwards;
+    text-align: center;
+    padding: 0 1rem;
   }
 
   .container {
@@ -56,6 +59,7 @@
   .random-test h2 {
     margin-bottom: 1rem;
     color: #1e40af;
+    font-size: 1.3rem;
   }
   .random-test button {
     background-color: #2563eb;
@@ -78,6 +82,7 @@
     gap: 1.6rem;
     max-width: 960px;
     margin: 0 auto 4rem;
+    padding: 0 1rem;
     opacity: 0;
     animation: slideUpFadeIn 1s ease 2s forwards;
   }
@@ -116,6 +121,40 @@
     color: #555;
   }
 
+  /* Адаптация под мобильные устройства */
+  @media (max-width: 768px) {
+    .hero {
+      font-size: 2.5rem;
+      height: 40vh;
+    }
+    .container {
+      padding: 0 1rem;
+      text-align: center;
+    }
+    .random-test {
+      margin: 1.5rem 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero {
+      font-size: 2rem;
+      height: 35vh;
+    }
+    .countries-list {
+      grid-template-columns: 1fr;
+    }
+    .random-test h2 {
+      font-size: 1.1rem;
+    }
+    .country-card img {
+      height: 120px;
+    }
+    p {
+      font-size: 1rem;
+    }
+  }
+
   /* Анимации */
   @keyframes fadeIn {
     from {opacity: 0;}
@@ -135,38 +174,35 @@
 </head>
 <body>
 
-      <div class="container">
+  <div class="container">
     <h1>Добро пожаловать на сайт «Изучение стран мира»</h1>
     <p>Изучай. Исследуй. Познавай.</p>
   </div>
-
 
   <section class="hero" role="img" aria-label="Фон с изображением мира">
     Страны мира
   </section>
 
-
   <div style="display: flex; flex-direction:column; align-content: center;">
-      <div>
-        <h1 style="margin-top: 6rem; text-align:center">Интересные страны</h1>
+    <div>
+      <h1 style="margin-top: 6rem; text-align:center">Интересные страны</h1>
     </div>
-  <% if (countries && countries.length) { %>
-  <section class="countries-list" aria-label="Список стран">
-    <% countries.forEach(country => { %>
-      <a href="/countries/<%= country._id %>" class="country-card" aria-label="Подробнее о стране <%= country.name %>">
-        <img src="<%= country.imagePaths && country.imagePaths[0] ? country.imagePaths[0] : '/images/default-country.jpg' %>" alt="Фото страны <%= country.name %>">
-        <div class="country-info">
-          <h3><%= country.name %></h3>
-          <p><%= country.capital ? 'Столица: ' + country.capital : '' %></p>
-        </div>
-      </a>
-    <% }) %>
-  </section>
-  <% } %>
+    <% if (countries && countries.length) { %>
+    <section class="countries-list" aria-label="Список стран">
+      <% countries.forEach(country => { %>
+        <a href="/countries/<%= country._id %>" class="country-card" aria-label="Подробнее о стране <%= country.name %>">
+          <img src="<%= country.imagePaths && country.imagePaths[0] ? country.imagePaths[0] : '/images/default-country.jpg' %>" alt="Фото страны <%= country.name %>">
+          <div class="country-info">
+            <h3><%= country.name %></h3>
+            <p><%= country.capital ? 'Столица: ' + country.capital : '' %></p>
+          </div>
+        </a>
+      <% }) %>
+    </section>
+    <% } %>
   </div>
 
-
-    <% if (randomTest) { %>
+  <% if (randomTest) { %>
   <section class="random-test" aria-label="Случайный тест">
     <p>Не хотите проверить свои знания?</p>
     <h2>Попробуйте пройти тест: <em><%= randomTest.title %></em></h2>
