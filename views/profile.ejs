@@ -4,6 +4,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #003366;
   }
+
   section {
     max-width: 600px;
     margin: 20px auto;
@@ -13,38 +14,70 @@
     box-shadow: 0 0 10px #ccc;
     font-family: Arial, sans-serif;
   }
+
   ul {
     list-style-type: none;
     padding-left: 0;
   }
+
   ul li {
     margin: 8px 0;
     font-size: 1.1em;
   }
+
   a {
     color: #00509e;
     text-decoration: none;
   }
+
   a:hover {
     text-decoration: underline;
   }
+
   .stat {
     font-size: 1.2em;
     margin: 10px 0;
   }
+
   .results-list li {
     background: #e6f0ff;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
   }
+
   .result-title {
     font-weight: 700;
     color: #004080;
   }
+
   .result-detail {
     margin-left: 10px;
     color: #333;
+  }
+
+  .logout-wrapper {
+    max-width: 600px;
+    margin: 30px auto;
+    text-align: center;
+  }
+
+  .logout-btn {
+    background-color: #c62828;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .logout-btn:hover {
+    background-color: #b71c1c;
   }
 </style>
 
@@ -76,20 +109,25 @@
   <% } else { %>
     <ul class="results-list">
       <% results.forEach(r => { %>
-  <% if (r.test) { %>
-    <li>
-      <span class="result-title"><%= r.test.title %></span> — 
-      <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
-      <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
-    </li>
-  <% } else { %>
-    <li>
-      <span class="result-title text-muted">[удалённый тест]</span> — 
-      <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
-      <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
-    </li>
-  <% } %>
-<% }) %>
+        <% if (r.test) { %>
+          <li>
+            <span class="result-title"><%= r.test.title %></span> — 
+            <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
+            <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
+          </li>
+        <% } else { %>
+          <li>
+            <span class="result-title text-muted">[удалённый тест]</span> — 
+            <span class="result-detail">Правильных ответов: <%= r.score %></span>, 
+            <span class="result-detail">Дата: <%= new Date(r.date).toLocaleDateString() %></span>
+          </li>
+        <% } %>
+      <% }) %>
     </ul>
   <% } %>
 </section>
+
+<!-- Кнопка "Выйти" внизу страницы -->
+<div class="logout-wrapper">
+  <a href="/auth/logout" class="logout-btn">Выйти</a>
+</div>

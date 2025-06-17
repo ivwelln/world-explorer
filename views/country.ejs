@@ -12,7 +12,7 @@
     header {
       background: #003366;
       color: white;
-      padding: 1em;
+      padding: 0.1rem;
       text-align: center;
     }
     .collage {
@@ -95,7 +95,7 @@
 </head>
 <body>
   <header style="border-radius: 10px;">
-    <h1 style="color: #ffffff;"><%= country.name %></h1>
+    <h1 style="color: #ffffff; font-size: 4rem; margin-top: 0.5rem; margin-bottom: 0.5rem;"><%= country.name %></h1>
   </header>
 
   <div class="collage">
@@ -109,7 +109,7 @@
       <div class="section orange">
         <h2>География</h2>
         <p><strong>Континент:</strong> <%= country.geography?.continent %></p>
-        <p><strong>Моря/океаны:</strong> <%= country.geography?.seasOceansCount %></p>
+        <p><strong>Моря:</strong> <%= country.geography?.seasOceansCount %></p>
         <p><strong>Реки:</strong> <%= country.geography?.riversCount %></p>
         <p><strong>Озёра:</strong> <%= country.geography?.lakesCount %></p>
         <p><strong>Площадь:</strong> <%= country.geography?.area %> км²</p>
@@ -141,11 +141,11 @@
   <div class="row">
     <div class="chart-box">
       <h3>История ВВП</h3>
-      <div id="gdpChart"></div>
+      <canvas id="gdpChart" width="400" height="300"></canvas>
     </div>
     <div class="chart-box">
       <h3>История населения</h3>
-      <div id="populationChart"></div>
+      <canvas id="populationChart" width="400" height="300"></canvas>
     </div>
   </div>
 
@@ -154,8 +154,8 @@
   <% if (country.sections?.length) { %>
     <% country.sections.forEach(section => { %>
       <div class="admin-section">
-        <h2><%= section.title %></h2>
-        <p><%= section.content %></p>
+       <h2><%= section.title %></h2>
+    <p><%= section.content %></p>
       </div>
     <% }) %>
   <% } %>
@@ -164,7 +164,7 @@
   <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 10px rgb(0, 0, 0);">
 </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
     const gdpHistory = <%- JSON.stringify(country.economy?.gdpHistory || []) %>;
     const populationHistory = <%- JSON.stringify(country.demographics?.populationHistory || []) %>;

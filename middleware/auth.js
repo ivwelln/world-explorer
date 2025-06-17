@@ -4,7 +4,7 @@ function ensureAuthenticated(req, res, next) {
         return next();
     }
     req.flash('error_msg', 'Пожалуйста, войдите в аккаунт');
-    res.redirect('/login');
+    res.redirect('/auth/login');
 };
 
 function requireAdmin(req, res, next) {

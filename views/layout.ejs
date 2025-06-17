@@ -116,7 +116,7 @@
       <% if (currentUser) { %>
         <a href="/profile">Профиль (<%= currentUser.name %>)</a>
         <% if (currentUser.role === 'admin') { %>
-          <a href="/admin">Админ</a>
+          <a href="/admin">Панель администратора</a>
         <% } %>
       <% } else { %>
         <a href="/auth/login">Вход</a>

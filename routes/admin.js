@@ -8,6 +8,8 @@ const Test = require('../models/Test');
 const User = require('../models/User');
 const TestResult = require('../models/TestResult');
 const { requireAdmin } = require('../middleware/auth'); // middleware для проверки прав
+const { ensureAuthenticated } = require('../middleware/auth'); // middleware для проверки прав
+
 const fs = require('fs');
 
 // Middleware для защиты маршрутов только для админов
@@ -98,6 +100,7 @@ router.post('/countries/create', upload.fields([
 ]), async (req, res) => {
   try {
     const body = req.body;
+    console.log('FILES:', req.files); // Тест
 
     // Обработка загрузок
     const flagFile = req.files['flag'] ? req.files['flag'][0].filename : null;
@@ -122,23 +125,23 @@ router.post('/countries/create', upload.fields([
         latitude: parseFloat(body.latitude) || null,
         longitude: parseFloat(body.longitude) || null,
         continent: body.continent || '',
-        seasOceansCount: parseInt(body.seasOceansCount) || 0,
-        riversCount: parseInt(body.riversCount) || 0,
-        lakesCount: parseInt(body.lakesCount) || 0,
-        area: parseFloat(body.area) || 0,
+        seasOceansCount: body.seasOceansCount || 0,
+        riversCount: body.riversCount || 0,
+        lakesCount: body.lakesCount || 0,
+        area: body.area || 0,
       },
       economy: {
-        gdp: parseFloat(body.gdp) || 0,
-        gdpPerCapita: parseFloat(body.gdpPerCapita) || 0,
+        gdp: body.gdp || 0,
+        gdpPerCapita: body.gdpPerCapita || 0,
         inflation: parseFloat(body.inflation) || 0,
         unemployment: parseFloat(body.unemployment) || 0,
-        avgSalary: parseFloat(body.avgSalary) || 0,
+        avgSalary: body.avgSalary || 0,
         gdpHistory,
       },
       demographics: {
-        population: parseInt(body.population) || 0,
-        populationDensity: parseFloat(body.populationDensity) || 0,
-        lifeExpectancy: parseFloat(body.lifeExpectancy) || 0,
+        population: body.population || 0,
+        populationDensity: body.populationDensity || 0,
+        lifeExpectancy: body.lifeExpectancy || 0,
         populationHistory,
       },
       sections,
@@ -158,7 +161,7 @@ router.post('/countries/create', upload.fields([
 
     await country.save();
 
-    res.redirect('/admin/countries');
+    res.redirect('/countries');
   } catch (err) {
     console.error(err);
     res.status(500).send('Ошибка создания страны');
@@ -166,7 +169,7 @@ router.post('/countries/create', upload.fields([
 });
 
 // Обработка обновления страны
-router.post('/countries/edit/:id', upload.fields([
+router.post('/countries/:id/edit', upload.fields([
   { name: 'flag', maxCount: 1 },
   { name: 'images', maxCount: 10 }
 ]), async (req, res) => {
@@ -219,23 +222,23 @@ router.post('/countries/edit/:id', upload.fields([
       latitude: parseFloat(body.latitude) || null,
       longitude: parseFloat(body.longitude) || null,
       continent: body.continent || '',
-      seasOceansCount: parseInt(body.seasOceansCount) || 0,
-      riversCount: parseInt(body.riversCount) || 0,
-      lakesCount: parseInt(body.lakesCount) || 0,
-      area: parseFloat(body.area) || 0,
+      seasOceansCount: body.seasOceansCount || 0,
+      riversCount: body.riversCount || 0,
+      lakesCount: body.lakesCount || 0,
+      area: body.area || 0,
     };
     country.economy = {
-      gdp: parseFloat(body.gdp) || 0,
-      gdpPerCapita: parseFloat(body.gdpPerCapita) || 0,
+      gdp: body.gdp || 0,
+      gdpPerCapita: body.gdpPerCapita || 0,
       inflation: parseFloat(body.inflation) || 0,
       unemployment: parseFloat(body.unemployment) || 0,
-      avgSalary: parseFloat(body.avgSalary) || 0,
+      avgSalary: body.avgSalary || 0,
       gdpHistory,
     };
     country.demographics = {
-      population: parseInt(body.population) || 0,
-      populationDensity: parseFloat(body.populationDensity) || 0,
-      lifeExpectancy: parseFloat(body.lifeExpectancy) || 0,
+      population: body.population || 0,
+      populationDensity: body.populationDensity || 0,
+      lifeExpectancy: body.lifeExpectancy || 0,
       populationHistory,
     };
     country.sections = sections;
@@ -291,7 +294,7 @@ router.get('/tests/new', async (req, res) => {
 });
 
 
-  router.get('/tests/:id/edit', async (req, res) => {
+  router.get('/tests/:id/edit', ensureAuthenticated, async (req, res) => {
     try {
       if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(400).send('Неверный ID теста');

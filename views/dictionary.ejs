@@ -149,7 +149,7 @@
       </div>
       <% if (user && user.role === 'admin') { %>
         <div class="actions" onclick="event.stopPropagation();">
-          <a href="/admin/countries/edit/<%= c._id %>" class="btn-edit">Редактировать</a>
+          <a href="/admin/countries/<%= c._id %>/edit" class="btn-edit">Редактировать</a>
           <form action="/admin/countries/delete/<%= c._id %>" method="POST" onsubmit="event.stopPropagation(); return confirm('Удалить <%= c.name %>?');">
             <button type="submit" class="btn-delete">Удалить</button>
           </form>

@@ -10,11 +10,6 @@ const historyItemSchema = new mongoose.Schema({
   value: Number
 });
 
-const customFieldSchema = new mongoose.Schema({
-  key: String,
-  value: String
-});
-
 const countrySchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   capital: String,
@@ -25,31 +20,30 @@ const countrySchema = new mongoose.Schema({
 
   geography: {
     continent: String,
-    seasOceansCount: Number,
-    riversCount: Number,
-    lakesCount: Number,
-    area: Number, // км²
+    seasOceansCount: String,
+    riversCount: String,
+    lakesCount: String,
+    area: String, // км²
     latitude: Number,  // Широта
     longitude: Number  // Долгота
   },
 
   economy: {
-    gdp: Number,
-    gdpPerCapita: Number,
+    gdp: String,
+    gdpPerCapita: String,
     inflation: Number,
     unemployment: Number,
-    avgSalary: Number,
+    avgSalary: String,
     gdpHistory: [historyItemSchema]
   },
 
   demographics: {
-    population: Number,
-    populationDensity: Number,
-    lifeExpectancy: Number,
+    population: String,
+    populationDensity: String,
+    lifeExpectancy: String,
     populationHistory: [historyItemSchema]
   },
 
-  customFields: [customFieldSchema] // Дополнительные произвольные поля
 });
 
 module.exports = mongoose.model('Country', countrySchema);

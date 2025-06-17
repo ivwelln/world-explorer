@@ -8,8 +8,8 @@
             value="<%= test ? test.title : '' %>" required>
 
         <label for="timeLimitSeconds" class="label">Время на тест (секунды)</label>
-        <input type="number" id="timeLimitSeconds" name="timeLimitSeconds" class="input" min="1"
-            placeholder="Например, 1800" value="<%= test ? test.timeLimitSeconds : '' %>" required>
+        <input type="number" id="timeLimitSeconds" name="timeLimitSeconds" class="input" style="border-radius: 10px; border-color:#f0f4ff" min="1"
+            placeholder="Например, 180" value="<%= test ? test.timeLimitSeconds : '' %>" required>
 
         <h3>Вопросы</h3>
         <div id="questionsContainer"></div>
@@ -18,6 +18,9 @@
             вопрос</button>
 
         <h3>Пул ответов (редактируемый)</h3>
+        <p>Вы можете добавить сюда свои варианты ответа, которые будут случайно предлагаться пользователю в качестве ответов.</p>
+        <p>Одако, в каждом вопросе есть гарантированно верный ответ.</p>
+
         <div id="answersPoolContainer"></div>
         <div style="display:flex; margin-top:10px;">
             <input type="text" id="newAnswerInput" class="input" placeholder="Новый ответ..."
@@ -129,16 +132,16 @@
 
                 div.innerHTML = `
                     <label>Вопрос ${i + 1}</label>
-                    <input type="text" class="input question-text" placeholder="Текст вопроса" value="${escapeHTML(q.question || '')}">
+                    <input type="text" class="input question-text" style="width:40rem;" placeholder="Текст вопроса" value="${escapeHTML(q.question || '')}">
 
                     <label>Правильный ответ</label>
-                    <input type="text" class="input correct-answer" placeholder="Правильный ответ" value="${escapeHTML(q.correctAnswer || '')}">
+                    <input type="text" class="input correct-answer" style="width:25rem;" placeholder="Правильный ответ" value="${escapeHTML(q.correctAnswer || '')}">
 
                     <label>Неправильные ответы (оставьте пустыми для использования пула)</label>
                     <div class="answer-grid">
-                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 1" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[0]) || '')}">
-                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 2" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[1]) || '')}">
-                        <input type="text" class="input wrong-answer" placeholder="Неправильный ответ 3" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[2]) || '')}">
+                        <input type="text" class="input wrong-answer" style="width:25rem;" placeholder="Неправильный ответ 1" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[0]) || '')}">
+                        <input type="text" class="input wrong-answer" style="width:25rem;" placeholder="Неправильный ответ 2" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[1]) || '')}">
+                        <input type="text" class="input wrong-answer" style="width:25rem;" placeholder="Неправильный ответ 3" value="${escapeHTML((q.wrongAnswers && q.wrongAnswers[2]) || '')}">
                     </div>
 
                     <button type="button" class="btn btn-outline delete-question-btn" style="margin-top:8px;">Удалить вопрос</button>

@@ -1,2 +1,180 @@
-<h1>Добро пожаловать на сайт «Изучение стран мира»</h1>
-<p>Здесь вы можете узнать многое о странах, пройти тесты и проверить свои знания.</p>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Изучение стран мира</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    color: #222;
+    overflow-x: hidden;
+  }
+  .hero {
+    position: relative;
+    height: 60vh;
+    background: url('<%= heroImage || "/images/default-hero.jpg" %>') center/cover no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 4rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    user-select: none;
+    animation: fadeIn 1.5s ease forwards;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 2rem auto 4rem;
+    padding: 0 1rem;
+  }
+
+  h1, h2 {
+    margin: 0 0 0.8rem 0;
+  }
+  p {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .random-test {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 2rem auto;
+    text-align: center;
+    opacity: 0;
+    animation: slideUpFadeIn 1s ease 1.5s forwards;
+  }
+  .random-test h2 {
+    margin-bottom: 1rem;
+    color: #1e40af;
+  }
+  .random-test button {
+    background-color: #2563eb;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  .random-test button:hover {
+    background-color: #1e40af;
+  }
+
+  .countries-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.6rem;
+    max-width: 960px;
+    margin: 0 auto 4rem;
+    opacity: 0;
+    animation: slideUpFadeIn 1s ease 2s forwards;
+  }
+
+  .country-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgb(0 0 0 / 0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .country-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgb(0 0 0 / 0.15);
+  }
+
+  .country-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+  }
+  .country-info {
+    padding: 1rem;
+    flex-grow: 1;
+  }
+  .country-info h3 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.2rem;
+    color: #1e40af;
+  }
+  .country-info p {
+    font-size: 0.95rem;
+    color: #555;
+  }
+
+  /* Анимации */
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  @keyframes slideUpFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+
+      <div class="container">
+    <h1>Добро пожаловать на сайт «Изучение стран мира»</h1>
+    <p>Изучай. Исследуй. Познавай.</p>
+  </div>
+
+
+  <section class="hero" role="img" aria-label="Фон с изображением мира">
+    Страны мира
+  </section>
+
+
+  <div style="display: flex; flex-direction:column; align-content: center;">
+      <div>
+        <h1 style="margin-top: 6rem; text-align:center">Интересные страны</h1>
+    </div>
+  <% if (countries && countries.length) { %>
+  <section class="countries-list" aria-label="Список стран">
+    <% countries.forEach(country => { %>
+      <a href="/countries/<%= country._id %>" class="country-card" aria-label="Подробнее о стране <%= country.name %>">
+        <img src="<%= country.imagePaths && country.imagePaths[0] ? country.imagePaths[0] : '/images/default-country.jpg' %>" alt="Фото страны <%= country.name %>">
+        <div class="country-info">
+          <h3><%= country.name %></h3>
+          <p><%= country.capital ? 'Столица: ' + country.capital : '' %></p>
+        </div>
+      </a>
+    <% }) %>
+  </section>
+  <% } %>
+  </div>
+
+
+    <% if (randomTest) { %>
+  <section class="random-test" aria-label="Случайный тест">
+    <p>Не хотите проверить свои знания?</p>
+    <h2>Попробуйте пройти тест: <em><%= randomTest.title %></em></h2>
+    <form action="/tests/start/<%= randomTest._id %>" method="GET">
+      <button type="submit" aria-label="Начать тест <%= randomTest.title %>">Пройти тест</button>
+    </form>
+  </section>
+  <% } %>
+
+</body>
+</html>

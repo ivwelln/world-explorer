@@ -1,13 +1,86 @@
-<h1>Вход</h1>
+<style>
+  .form-wrapper {
+    max-width: 400px;
+    margin: 5rem auto;
+    padding: 2rem;
+    border: 1px solid #cce0f5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+    box-shadow: 0 4px 10px rgba(0, 102, 204, 0.1);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color: #003366;
+  }
+
+  .form-wrapper h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-wrapper label {
+    display: block;
+    margin: 1rem 0 0.5rem;
+    font-weight: 500;
+  }
+
+  .form-wrapper input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #b3cce6;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .form-wrapper input:focus {
+    border-color: #3399ff;
+    outline: none;
+  }
+
+  .form-wrapper .error {
+    color: #cc0000;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .form-wrapper button {
+    width: 100%;
+    margin-top: 1.5rem;
+    background-color: #4d7eaf;
+    color: white;
+    padding: 0.7rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .form-wrapper button:hover {
+    background-color: #3b6c99;
+    transform: translateY(-1px);
+  }
+</style>
+
+<div class="form-wrapper">
+  <h1>Вход</h1>
 
 <% if (error) { %>
-    <p class="error">
-        <%= error %>
-    </p>
-    <% } %>
+  <p class="error"><%= error %></p>
+<% } %>
 
-        <form method="POST" action="/auth/login">
-            <label>Email:<br /><input type="email" name="email" required></label><br />
-            <label>Пароль:<br /><input type="password" name="password" required></label><br />
-            <button type="submit">Войти</button>
-        </form>
+
+  <form method="POST" action="/auth/login">
+    <label>Email:</label>
+    <input type="email" name="email" required />
+
+    <label>Пароль:</label>
+    <input type="password" name="password" required />
+
+    <button type="submit">Войти</button>
+  </form>
+
+  <p style="text-align: center; margin-top: 1rem;">
+    Ещё не зарегистрированы? <a href="/auth/register" style="color: #3366cc;">Создать аккаунт</a>
+  </p>
+</div>

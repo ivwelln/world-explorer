@@ -165,12 +165,12 @@
     <tbody>
       <% users.forEach(user => { %>
         <tr>
-          <td data-label="Имя пользователя"><%= user.username %></td>
+          <td data-label="Имя пользователя"><%= user.name %></td>
           <td data-label="Email"><%= user.email %></td>
           <td data-label="Роль"><%= user.role %></td>
           <td data-label="Дата регистрации"><%= user.createdAt ? user.createdAt.toLocaleDateString('ru-RU') : '—' %></td>
           <td data-label="Статистика">
-            Тестов пройдено: <%= user.testHistory?.length || 0 %>
+            Тестов пройдено: <%= user.stats.testsPassed || 0 %>
           </td>
           <td data-label="Действия">
             <div class="actions">

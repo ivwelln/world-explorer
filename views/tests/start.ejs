@@ -10,7 +10,7 @@
       color: #000;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 2rem;
+      padding: 0rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -18,10 +18,16 @@
       box-sizing: border-box;
       position: relative;
     }
+    
+    .layout-main{
+        margin: 0px;
+        padding: 0px;
+    }
 
     /* Таймер ниже, центрирован */
     #timer {
       margin-top: 1rem;
+      margin-bottom: 1rem;
       font-weight: 700;
       font-size: 1.3rem;
       color: #0a47a1;
@@ -49,8 +55,8 @@
     }
 
     #question-text {
-      font-weight: 600;
-      font-size: 1.25rem;
+      font-weight: 800;
+      font-size: 2.25rem;
       margin-bottom: 1.5rem;
       text-align: center;
       white-space: pre-wrap;
@@ -244,7 +250,7 @@
 <body>
   <h1><%= test.title %></h1>
 
-  <div id="timer">Время осталось: <span id="time-remaining"><%= test.timeLimitSeconds || 120 %></span> сек</div>
+  <div id="timer">Время осталось: <span id="time-remaining"><%= test.timeLimitSeconds%></span> секунд</div>
 
   <div id="question-container" aria-live="polite">
     <div id="question-text"></div>
@@ -441,7 +447,7 @@
     function startTimer() {
       timerInterval = setInterval(() => {
         timeLeft--;
-        timerEl.textContent = `Время осталось: ${timeLeft} сек`;
+        timerEl.textContent = ` ${timeLeft} `;
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           finishTest();

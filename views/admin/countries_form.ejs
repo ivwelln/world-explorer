@@ -131,19 +131,6 @@
 .image-wrapper:hover .delete-btn {
   display: block;
 }
-.image-wrapper {
-  position: relative;
-  display: inline-block;
-  margin: 0.5em 0;
-}
-
-.image-wrapper img.thumbnail {
-  width: 150px;
-  height: 100px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid #ccc;
-}
 
 .image-wrapper .delete-btn {
   position: absolute;
@@ -164,131 +151,135 @@
 }
   </style>
 </head>
-<body>
-  <form method="POST" action="<%= country ? '/admin/countries/' + country._id + '/edit' : '/admin/countries/create' %>" enctype="multipart/form-data" onsubmit="prepareData()">
-    <h1><%= title %></h1>
+<form method="POST" action="<%= country ? '/admin/countries/' + country._id + '/edit' : '/admin/countries/create' %>" enctype="multipart/form-data" onsubmit="prepareData()">
+  <h1><%= title %></h1>
 
-    <label>Название</label>
-    <input type="text" name="name" value="<%= country?.name || '' %>" required>
+  <label>Название</label>
+  <input type="text" name="name" value="<%= country?.name || '' %>" required>
 
-    <label>Столица</label>
-    <input type="text" name="capital" value="<%= country?.capital || '' %>">
+  <label>Столица</label>
+  <input type="text" name="capital" value="<%= country?.capital || '' %>" required>
 
-    <!-- Загрузка флага -->
-    <label class="file-label" onclick="document.getElementById('flagInput').click()">
-  Флаг (PNG, JPG)
+  <!-- Загрузка флага -->
+  <label for="flagInput" class="file-label">Флаг (PNG, JPG)</label>
   <input type="file" name="flag" id="flagInput" accept="image/*" style="display:none" onchange="handleFlagSelect(event)">
-</label>
 
-<div id="flagPreviewContainer">
-  <% if (country?.flagPath) { %>
-    <div class="image-wrapper" id="flagWrapper">
-      <img src="<%= country.flagPath %>" alt="Флаг" class="thumbnail" id="flagPreview">
-      <span class="delete-btn" onclick="removeFlag()">удалить</span>
-    </div>
-    <input type="hidden" name="oldFlagPath" value="<%= country.flagPath %>">
-  <% } %>
-</div>
-
-    <label class="file-label">Фотографии страны (можно несколько)
-  <input type="file" name="images" id="imageInput" multiple accept="image/*" style="display:none" onchange="handleImageSelect(event)">
-</label>
-<div id="imagePreviewContainer" class="row" style="flex-wrap: wrap;"></div>
-<input type="hidden" name="deletedImages" id="deletedImages">
-    <% if (country?.imagePaths?.length) { %>
-      <% country.imagePaths.forEach(path => { %>
-        <img src="<%= path %>" alt="Фото" class="thumbnail">
-      <% }) %>
-      <input type="hidden" name="oldImagePaths" value='<%= JSON.stringify(country.imagePaths) %>'>
+  <div id="flagPreviewContainer">
+    <% if (country?.flagPath) { %>
+      <div class="image-wrapper" id="flagWrapper">
+        <img src="<%= country.flagPath %>" alt="Флаг" class="thumbnail" id="flagPreview">
+        <span class="delete-btn" onclick="removeFlag()">удалить</span>
+      </div>
+      <input type="hidden" name="oldFlagPath" value="<%= country.flagPath %>">
     <% } %>
+  </div>
 
-    <label>Координаты (широта и долгота)</label>
-    <div class="row">
-      <input class="half" type="number" name="latitude" step="any" placeholder="Широта" value="<%= country?.geography?.latitude || '' %>">
-      <input class="half" type="number" name="longitude" step="any" placeholder="Долгота" value="<%= country?.geography?.longitude || '' %>">
-    </div>
+  <label class="file-label">Фотографии страны (можно несколько)
+    <input type="file" name="images" id="imageInput" multiple accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+  </label>
 
-    <div class="section">
-      <h3>География</h3>
-      <label>Континент</label>
-      <input type="text" name="continent" value="<%= country?.geography?.continent || '' %>">
-      <label>Количество морей/океанов</label>
-      <input type="number" name="seasOceansCount" value="<%= country?.geography?.seasOceansCount || '' %>">
-      <label>Количество рек</label>
-      <input type="number" name="riversCount" value="<%= country?.geography?.riversCount || '' %>">
-      <label>Количество озёр</label>
-      <input type="number" name="lakesCount" value="<%= country?.geography?.lakesCount || '' %>">
-      <label>Площадь (в км²)</label>
-      <input type="number" name="area" step="any" value="<%= country?.geography?.area || '' %>">
-    </div>
+  <div id="imagePreviewContainer" class="row" style="flex-wrap: wrap;">
+    <% if (country?.imagePaths?.length) {
+      country.imagePaths.forEach((path, index) => { %>
+        <div class="image-wrapper" data-index="<%= index %>">
+          <img src="<%= path %>" class="thumbnail" alt="Фото">
+          <span class="delete-btn" onclick="removeOldImage(<%= index %>)">удалить</span>
+        </div>
+      <% });
+    } %>
+  </div>
 
-    <div class="section">
-      <h3>Экономика</h3>
-      <label>ВВП</label>
-      <input type="number" name="gdp" step="any" value="<%= country?.economy?.gdp || '' %>">
-      <label>ВВП на душу населения</label>
-      <input type="number" name="gdpPerCapita" step="any" value="<%= country?.economy?.gdpPerCapita || '' %>">
-      <label>Инфляция (%)</label>
-      <input type="number" name="inflation" step="any" value="<%= country?.economy?.inflation || '' %>">
-      <label>Уровень безработицы (%)</label>
-      <input type="number" name="unemployment" step="any" value="<%= country?.economy?.unemployment || '' %>">
-      <label>Средняя зарплата</label>
-      <input type="number" name="avgSalary" step="any" value="<%= country?.economy?.avgSalary || '' %>">
-      <label>История ВВП <span class="note">(JSON: [{ "year": 2000, "value": 3000 }])</span></label>
-      <textarea name="gdpHistory" oninput="updateChart('gdp')"><%= JSON.stringify(country?.economy?.gdpHistory || []) %></textarea>
-      <canvas id="gdpChart" height="200"></canvas>
-    </div>
+  <input type="hidden" name="oldImagePaths" value='<%= JSON.stringify((country && country.imagePaths) || []) %>'>
 
-    <div class="section">
-      <h3>Демография</h3>
-      <label>Население</label>
-      <input type="number" name="population" value="<%= country?.demographics?.population || '' %>">
-      <label>Плотность населения</label>
-      <input type="number" name="populationDensity" step="any" value="<%= country?.demographics?.populationDensity || '' %>">
-      <label>Ожидаемая продолжительность жизни</label>
-      <input type="number" name="lifeExpectancy" step="any" value="<%= country?.demographics?.lifeExpectancy || '' %>">
-      <label>История численности населения <span class="note">(JSON: [{ "year": 2000, "value": 50000000 }])</span></label>
-      <textarea name="populationHistory" oninput="updateChart('population')"><%= JSON.stringify(country?.demographics?.populationHistory || []) %></textarea>
-      <canvas id="populationChart" height="200"></canvas>
-    </div>
+  <label>Координаты (широта и долгота)</label>
+  <div class="row">
+    <input class="half" type="number" name="latitude" step="any" placeholder="Широта" value="<%= country?.geography?.latitude || '' %>" required>
+    <input class="half" type="number" name="longitude" step="any" placeholder="Долгота" value="<%= country?.geography?.longitude || '' %>" required>
+  </div>
 
-    <div class="section">
-      <h3>Разделы</h3>
-      <div id="sections-container">
-        <% if (country?.sections?.length) {
-          country.sections.forEach(section => { %>
-            <div class="section">
-              <input type="text" name="sectionTitles" placeholder="Заголовок" value="<%= section.title %>">
-              <textarea name="sectionContents" placeholder="Содержимое"><%= section.content %></textarea>
-            </div>
-        <% }) } else { %>
+  <div class="section">
+    <h3>География</h3>
+    <label>Континент</label>
+    <input type="text" name="continent" value="<%= country?.geography?.continent || '' %>" required>
+
+    <label>Количество морей</label>
+    <input type="text" name="seasOceansCount" value="<%= country?.geography?.seasOceansCount || '' %>" required>
+
+    <label>Количество рек</label>
+    <input type="text" name="riversCount" value="<%= country?.geography?.riversCount || '' %>" required>
+
+    <label>Количество озёр</label>
+    <input type="text" name="lakesCount" value="<%= country?.geography?.lakesCount || '' %>" required>
+
+    <label>Площадь (в км²)</label>
+    <input type="text" name="area" step="any" value="<%= country?.geography?.area || '' %>" required>
+  </div>
+
+  <div class="section">
+    <h3>Экономика</h3>
+    <label>ВВП</label>
+    <input type="text" name="gdp" step="any" value="<%= country?.economy?.gdp || '' %>" required>
+
+    <label>ВВП на душу населения</label>
+    <input type="text" name="gdpPerCapita" step="any" value="<%= country?.economy?.gdpPerCapita || '' %>" required>
+
+    <label>Инфляция (%)</label>
+    <input type="number" name="inflation" step="any" value="<%= country?.economy?.inflation || '' %>" required>
+
+    <label>Уровень безработицы (%)</label>
+    <input type="number" name="unemployment" step="any" value="<%= country?.economy?.unemployment || '' %>" required>
+
+    <label>Средняя зарплата</label>
+    <input type="text" name="avgSalary" step="any" value="<%= country?.economy?.avgSalary || '' %>" required>
+
+    <label>История ВВП</label>
+    <div id="gdp-history-container"></div>
+    <button type="button" onclick="addHistoryPoint('gdp')">Добавить точку</button>
+    <input type="hidden" name="gdpHistory" id="gdpHistory">
+    <canvas id="gdpChart" height="200"></canvas>
+  </div>
+
+  <div class="section">
+    <h3>Демография</h3>
+    <label>Население</label>
+    <input type="text" name="population" value="<%= country?.demographics?.population || '' %>" required>
+
+    <label>Плотность населения</label>
+    <input type="text" name="populationDensity" step="any" value="<%= country?.demographics?.populationDensity || '' %>" required>
+
+    <label>Ожидаемая продолжительность жизни</label>
+    <input type="text" name="lifeExpectancy" step="any" value="<%= country?.demographics?.lifeExpectancy || '' %>" required>
+
+    <label>История численности населения</label>
+    <div id="population-history-container"></div>
+    <button type="button" onclick="addHistoryPoint('population')">Добавить точку</button>
+    <input type="hidden" name="populationHistory" id="populationHistory">
+    <canvas id="populationChart" height="200"></canvas>
+  </div>
+
+  <div class="section">
+    <h3>Разделы</h3>
+    <div id="sections-container">
+      <% if (country?.sections?.length) {
+        country.sections.forEach(section => { %>
           <div class="section">
-            <input type="text" name="sectionTitles" placeholder="Заголовок">
-            <textarea name="sectionContents" placeholder="Содержимое"></textarea>
+            <input type="text" name="sectionTitles" placeholder="Заголовок" value="<%= section.title %>">
+            <textarea name="sectionContents" placeholder="Содержимое"><%= section.content %></textarea>
           </div>
-        <% } %>
-      </div>
-      <button type="button" onclick="addSection()">Добавить раздел</button>
+      <% }) } else { %>
+        <div class="section">
+          <input type="text" name="sectionTitles" placeholder="Заголовок">
+          <textarea name="sectionContents" placeholder="Содержимое"></textarea>
+        </div>
+      <% } %>
     </div>
+    <button type="button" onclick="addSection()">Добавить раздел</button>
+  </div>
 
-    <div class="section">
-      <h3>Дополнительные поля</h3>
-      <div id="custom-fields">
-        <% if (country?.customFields) {
-          Object.entries(country.customFields).forEach(([key, value]) => { %>
-            <div class="row">
-              <input class="half" type="text" name="customFieldKeys" value="<%= key %>" placeholder="Название поля">
-              <input class="half" type="text" name="customFieldValues" value="<%= value %>" placeholder="Значение">
-            </div>
-        <% }) } %>
-      </div>
-      <button type="button" onclick="addCustomField()">Добавить поле</button>
-    </div>
-
-    <input type="hidden" name="sections" id="sections-json">
-    <input type="hidden" name="customFields" id="customFields-json">
-    <button type="submit">Сохранить</button>
-  </form>
+  <input type="hidden" name="sections" id="sections-json">
+  <input type="hidden" name="customFields" id="customFields-json">
+  <button type="submit">Сохранить</button>
+</form>
 
   <script>
     function addSection() {
@@ -503,10 +494,8 @@ function handleFlagSelect(event) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    // Если уже есть превью — просто заменяем src
     let previewImg = document.getElementById('flagPreview');
     if (!previewImg) {
-      // Если превью нет, создаем контейнер с изображением и кнопкой удаления
       const container = document.getElementById('flagPreviewContainer');
       container.innerHTML = `
         <div class="image-wrapper" id="flagWrapper">
@@ -522,17 +511,122 @@ function handleFlagSelect(event) {
 }
 
 function removeFlag() {
-  // Удаляем превью и очищаем input
   const container = document.getElementById('flagPreviewContainer');
   container.innerHTML = '';
   
   const input = document.getElementById('flagInput');
-  input.value = ''; // сброс выбранного файла
-
-  // Если есть скрытое поле с oldFlagPath, удаляем или очищаем его, чтобы при отправке старый флаг не учитывался
+  input.value = '';
   const oldFlagInput = document.querySelector('input[name="oldFlagPath"]');
   if (oldFlagInput) oldFlagInput.remove();
 }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    updateChart('gdp');
+    updateChart('population');
+  });
+</script>
+<script>
+  let deletedOldImages = [];
+
+  function removeOldImage(index) {
+    deletedOldImages.push(index);
+    document.getElementById('deletedImages').value = JSON.stringify(deletedOldImages);
+    const wrapper = document.querySelector(`.image-wrapper[data-index="${index}"]`);
+    if (wrapper) wrapper.remove();
+  }
+</script>
+<script>
+  const initialData = {
+    gdp: <%- JSON.stringify(country?.economy?.gdpHistory || []) %>,
+    population: <%- JSON.stringify(country?.demographics?.populationHistory || []) %>
+  };
+
+  function addHistoryPoint(type, year = '', value = '') {
+    const container = document.getElementById(`${type}-history-container`);
+    const div = document.createElement('div');
+    div.classList.add('row');
+    div.style.marginBottom = '0.5em';
+    div.innerHTML = `
+      <input class="half" type="number" placeholder="Год" value="${year}" onchange="updateHistoryJSON('${type}')">
+      <input class="half" type="number" placeholder="Значение" value="${value}" onchange="updateHistoryJSON('${type}')">
+    `;
+    container.appendChild(div);
+    updateHistoryJSON(type);
+  }
+
+  function updateHistoryJSON(type) {
+    const container = document.getElementById(`${type}-history-container`);
+    const inputs = container.querySelectorAll('input');
+    const data = [];
+    for (let i = 0; i < inputs.length; i += 2) {
+      const year = parseInt(inputs[i].value);
+      const value = parseFloat(inputs[i+1].value);
+      if (!isNaN(year) && !isNaN(value)) {
+        data.push({ year, value });
+      }
+    }
+    document.getElementById(`${type}History`).value = JSON.stringify(data);
+    drawChart(type, data);
+  }
+
+  function drawChart(type, data) {
+    const ctx = document.getElementById(`${type}Chart`).getContext('2d');
+    const labels = data.map(d => d.year);
+    const values = data.map(d => d.value);
+
+    const chartRef = type === 'gdp' ? gdpChart : populationChart;
+    if (chartRef) chartRef.destroy();
+
+    const newChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: type === 'gdp' ? 'ВВП' : 'Население',
+          data: values,
+          borderColor: type === 'gdp' ? '#007bff' : '#28a745',
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Год'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Значение'
+            }
+          }
+        }
+      }
+    });
+
+    if (type === 'gdp') gdpChart = newChart;
+    else populationChart = newChart;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Инициализация графиков с данными
+    ['gdp', 'population'].forEach(type => {
+      initialData[type].forEach(({ year, value }) => {
+        addHistoryPoint(type, year, value);
+      });
+    });
+  });
+
 </script>
 </body>
 </html>
