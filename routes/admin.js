@@ -257,7 +257,7 @@ router.post('/countries/:id/edit', upload.fields([
 
     await country.save();
 
-    res.redirect('/admin/countries');
+    res.redirect('/countries');
   } catch (err) {
     console.error(err);
     res.status(500).send('Ошибка обновления страны');
